@@ -1,7 +1,9 @@
-class Animal:
+from abc import ABC, abstractmethod
+
+class Animal(ABC):
     satiety_max = 100
     scream = "AAAAAA"  #defualt scream
-
+    item = None
     def __init__(self, name, weight, satiety_level = 100):
         self.name = name
         self.weight = weight
@@ -17,37 +19,38 @@ class Animal:
         return self.satiety_level
 
     def get_scream(self):
-        print(self.scream)
+        return self.scream
+    
+    @abstractmethod
+    def collect(self):
+        pass
 
 
 class Bird(Animal):
-    
+    item = 'Яйцо'
     def __init__(self, name, weight, egg_number = 3, satiety_level = 50):
         Animal.__init__(self, name, weight, satiety_level)
         self.egg_number = egg_number
 
-    def get_egg(self, eggs_to_get):
+    def collect(self):
         """
-        Return int with number of egg you get and change bird's eggs number
+        Return int with number of eggs you collected
         """
-        if self.egg_number >= eggs_to_get:
-            self.egg_number -= eggs_to_get
-            return eggs_to_get
-        else:
-            self.egg_copy = self.egg_number
-            self.egg_number = 0
-            return self.egg_copy
+        egg_to_return = self.egg_number
+        self.egg_number = 0
+        return egg_to_return
 
 
 class MilkAnimal(Animal):
     """
     Parent class for animals with milk.
     """
+    item = "Молоко"
     def __init__(self, name, weight, satiety_level=100, milk_level=1.0):
         Animal.__init__(self, name, weight, satiety_level=100)
         self.milk_level = milk_level
     
-    def get_milk(self):
+    def collect(self):
         """
         Get 1.0 liter of milk from animal. Return milk in liters (float)
         """
@@ -73,14 +76,14 @@ class Goat(MilkAnimal):
 
 class Sheep(Animal):
     scream = 'Бе-Бе-Бе'
-
+    item = 'Шерсть'
     def __init__(self, name, weight, satiety_level=100, ready_to_shear = True):
         Animal.__init__(self, name, weight, satiety_level=100)
         self.ready_to_shear = ready_to_shear
 
-    def shear(self):
+    def collect(self):
         if self.ready_to_shear:
-            return 'Шерсть!'
+            return '1 кг'
         else:
             return 'Шерсть еще не выросла'
 
@@ -106,38 +109,24 @@ sheep_1 = Sheep('Барашек', 30)
 sheep_2 = Sheep('Кудрявый', 34)
 
 chicken_1 = Chicken('Ко-Ко', 4, 1)
-chicken_1 = Chicken('Кукареку', 3.8)
+chicken_2 = Chicken('Кукареку', 3.8)
 
 goat_1 = Goat('Рога', 35)
 goat_2 = Goat('Копыта', 33, satiety_level=35)
 
 duck_1 = Duck('Кряква', 6)
 
-
-
-print('Взять яйца гуся 1: ', goose_1.get_egg(4))
-print('Количество яиц гуся 1: ', goose_1.egg_number)
-print('Покормить гуся 1: ', goose_1.feed(2))
-print('Покормить козу 2: ', goat_2.feed(1))
-print('Взять яйца курицы 1: ', chicken_1.get_egg(1))
-print('Взять яйца утки 1: ', duck_1.get_egg(2))
-print('Доить корову 1: ', cow_1.get_milk())
-print('Доить козу 1: ', goat_1.get_milk())
-print('Стричь овцу 1: ', sheep_1.shear())
 cow_1.get_scream()
 goose_1.get_scream()
-goose_1.feed(1)
-goose_2.feed(1)
-cow_1
-sheep_1.feed(1)
-sheep_2.feed(1)
-chicken_1.feed(1)
-chicken_1.feed(1)
-goat_1.feed(1)
-goat_2.feed(1)
-duck_1.feed(1)
 
-all_animals = [goose_1, goose_2, cow_1, sheep_1, sheep_2, chicken_1, chicken_1, goat_1, goat_2, duck_1]
+
+all_animals = [goose_1, goose_2, cow_1, sheep_1, sheep_2, chicken_1, chicken_2, goat_1, goat_2, duck_1]
+
+for animal in all_animals:
+    animal.feed(1)
+    colletcted_item = animal.collect()
+    # scream = animal.get_scream()
+    print(f"{animal.name} кричит {animal.get_scream()}, его уровень голода после кормления {animal.satiety_level}%. С животного собрано {colletcted_item} {animal.item}")
 
 sum_weight = 0.0
 
@@ -146,12 +135,5 @@ for animal in all_animals:
 
 print('Общий вес всех животных:', round(sum_weight, 2))
 
-animals_weght_dict = {}
-
-for animal in all_animals:
-    animals_weght_dict[animal] = animal.weight
-max_weight = max(animals_weght_dict.values())
-for animal, weight in animals_weght_dict.items():
-    if max_weight == weight:
-        print("Самое тяжелое животное: ", animal.name)
-
+all_animals.sort(key=lambda animal: animal.weight)
+print("Самое тяжелое животное:", all_animals[-1].name)
