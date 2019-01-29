@@ -14,7 +14,6 @@ def parse_cook_book(file_name):
 
 
 def read_dish(file_obj):
-    dish = {}
     f = file_obj
     dish_name = f.readline().strip()
     products = []
