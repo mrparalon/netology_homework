@@ -2,12 +2,13 @@ from abc import ABC, abstractmethod
 
 class Animal(ABC):
     satiety_max = 100
-    scream = "AAAAAA"  #defualt scream
-    item = None
-    def __init__(self, name, weight, satiety_level = 100):
+
+    def __init__(self, name, weight, scream, item, satiety_level = 100):
         self.name = name
         self.weight = weight
         self.satiety_level = satiety_level
+        self.scream = scream
+        self.item = item
 
     def feed(self, food_amount):
         """
@@ -27,10 +28,10 @@ class Animal(ABC):
 
 
 class Bird(Animal):
-    item = 'Яйцо'
-    def __init__(self, name, weight, egg_number = 3, satiety_level = 50):
-        Animal.__init__(self, name, weight, satiety_level)
+    def __init__(self, name, weight, scream, egg_number = 3, satiety_level = 50):
+        super().__init__(name, weight, scream, satiety_level)
         self.egg_number = egg_number
+        self.item='Яйцо'
 
     def collect(self):
         """
@@ -45,10 +46,11 @@ class MilkAnimal(Animal):
     """
     Parent class for animals with milk.
     """
-    item = "Молоко"
-    def __init__(self, name, weight, satiety_level=100, milk_level=1.0):
-        Animal.__init__(self, name, weight, satiety_level=100)
+    def __init__(self, name, weight, scream, satiety_level=100, milk_level=1.0):
+        super().__init__(name, weight, scream, satiety_level)
         self.milk_level = milk_level
+        self.item='Молоко'
+
     
     def collect(self):
         """
@@ -67,18 +69,20 @@ class Cow(MilkAnimal):
     """
     Milk level in %
     """
-    scream = 'Мууууу'
+    def __init__(self, name, weight, satiety_level=100, milk_level=1.0):
+        super().__init__(name, weight, 'Мууууу', satiety_level, milk_level)
+
 
 
 class Goat(MilkAnimal):
-    scream = 'Меееееh' #это коза-скептик
+    def __init__(self, name, weight, satiety_level=100, milk_level=1.0):
+        super().__init__(name, weight, 'Meeee', satiety_level, milk_level)
 
 
 class Sheep(Animal):
-    scream = 'Бе-Бе-Бе'
-    item = 'Шерсть'
     def __init__(self, name, weight, satiety_level=100, ready_to_shear = True):
-        Animal.__init__(self, name, weight, satiety_level=100)
+        self.item = 'Шерсть'
+        super().__init__(name, weight, 'Be-BE-be', satiety_level)
         self.ready_to_shear = ready_to_shear
 
     def collect(self):
@@ -89,15 +93,19 @@ class Sheep(Animal):
 
 
 class Goose(Bird):
-    scream = 'Га-Га-Га'
+    def __init__(self, name, weight, egg_number = 3, satiety_level = 50):
+        super().__init__(name, weight, 'GAGA', egg_number, satiety_level)
+
 
 
 class Chicken(Bird):
-    scream = 'Ко-Ко-Ко'
+    def __init__(self, name, weight, egg_number = 3, satiety_level = 50):
+        super().__init__(name, weight, 'KOKO', egg_number, satiety_level)
 
 class Duck(Bird):
     swimming = True
-    scream = 'Кря-Кря-Зря'
+    def __init__(self, name, weight, egg_number = 3, satiety_level = 50):
+        super().__init__(name, weight, 'KRYA', egg_number, satiety_level)
 
 
 goose_1 = Goose('Серый', 10)
