@@ -27,7 +27,7 @@ def read_dish(file_obj):
     return dish_name, products
 
 
-def get_shop_list_by_dishes(dishes, person_count):
+def get_shop_list_by_dishes(cook_book, dishes, person_count):
     shop_list = {}
     for dish in dishes:
         if dish in cook_book:
@@ -43,9 +43,11 @@ def get_shop_list_by_dishes(dishes, person_count):
     return shop_list
 
 
+def print_with_no_globals(file_name, dishes, person_count):
+    cook_book = parse_cook_book(file_name)
+    shop_list = get_shop_list_by_dishes(cook_book, dishes, person_count)
+    pprint(cook_book)
+    pprint(shop_list)
 
+print_with_no_globals('recipe.txt', ['Запеченный картофель', 'Омлет'], 2)
 
-cook_book = parse_cook_book('recipe.txt')
-shop_list = get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'], 2)
-pprint(cook_book)
-pprint(shop_list)
