@@ -30,6 +30,19 @@ def vk_api_get_request(url, request_method, params):
     return response
 
 
+
+def get_full_groups_info(groups_id_list):
+    params = {
+            'v': '5.52',
+            'access_token': TOKEN,
+            'group_ids': ','.join(groups_id_list),
+            'fields': 'members_count'
+        }
+    resp_groups_info = vk_api_get_request(URL_METHOD, 'groups.getById', params)
+    user_groups_info = resp_groups_info.json()['response']
+    return user_groups_info
+
+
 class VkUser:
     def __init__(self, id):
         self. params = {
@@ -57,14 +70,6 @@ class VkUser:
         except (PermissionDenied, BannedDeletedUser):
             pass
         
-
-    def get_all_groups_info(self):
-        params = self.params
-        params['group_ids'] = ','.join(self.groups)
-        params['fields'] = 'members_count'
-        resp_groups_info = vk_api_get_request(URL_METHOD, 'groups.getById', self.params)
-        user_groups_info = resp_groups_info.json()['response']
-        return user_groups_info
 
     def get_friends_list(self):
         try:
@@ -121,6 +126,13 @@ if __name__ == '__main__':
     user = VkUser(id)
     user.get_groups_id_list()
     unique_groups = user.get_unique_groups()
-    print(unique_groups)
+    unique_groups_info = get_full_groups_info(unique_groups)
+    unique_groups_obj_list = []
+    for group in unique_groups_info:
+        unique_groups_obj_list.append(VkGroup(group))
+    with open('groups.json', 'a') as groups_json:
+        for group in unique_groups_obj_list:
+            json.dump(group.short_group_info, groups_json)
+    # print(unique_groups)
     print(f'Hello, {user}!')
 
