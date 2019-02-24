@@ -2,7 +2,6 @@
 import requests
 from time import sleep
 import sys
-from pprint import pprint
 import json
 from vk_api_exceprions import BannedDeletedUser, PermissionDenied
 import settings
@@ -14,6 +13,7 @@ Run using comand line, pass user ID as argument
 
 URL_METHOD = 'https://api.vk.com/method/'
 TOKEN = settings.token
+
 
 def vk_api_get_request(url, request_method, params):
     response = requests.get(url + request_method, params=params)
@@ -28,7 +28,6 @@ def vk_api_get_request(url, request_method, params):
             raise BannedDeletedUser('User was deleted or banned')
     sleep(0.35)
     return response
-
 
 
 def get_full_groups_info(groups_id_list):
@@ -69,7 +68,6 @@ class VkUser:
             return groups
         except (PermissionDenied, BannedDeletedUser):
             pass
-        
 
     def get_friends_list(self):
         try:
@@ -88,7 +86,6 @@ class VkUser:
             if friend_obj.groups:
                 groups_set = groups_set - set(friend_obj.groups)
         return groups_set
-
 
 
 class VkGroup:
@@ -119,8 +116,6 @@ class VkGroup:
         return str(self.short_group_info)
 
 
-
-
 if __name__ == '__main__':
     id = sys.argv[1]
     user = VkUser(id)
@@ -130,9 +125,9 @@ if __name__ == '__main__':
     unique_groups_obj_list = []
     for group in unique_groups_info:
         unique_groups_obj_list.append(VkGroup(group))
-    with open('groups.json', 'a') as groups_json:
+    with open('groups.json', 'w', encoding='utf8') as groups_json:
+        result = []
         for group in unique_groups_obj_list:
-            json.dump(group.short_group_info, groups_json)
-    # print(unique_groups)
-    print(f'Hello, {user}!')
+            result.append(group.short_group_info)
+        json.dump(result, groups_json, ensure_ascii=False)
 
