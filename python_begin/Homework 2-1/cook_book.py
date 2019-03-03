@@ -49,5 +49,5 @@ def print_with_no_globals(file_name, dishes, person_count):
     pprint(cook_book)
     pprint(shop_list)
 
-print_with_no_globals('recipe.txt', ['Запеченный картофель', 'Омлет'], 2)
+print_with_no_globals('Homework 2-1\\recipe.txt', ['Запеченный картофель', 'Омлет'], 2)
 
