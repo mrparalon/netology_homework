@@ -1,1 +1,1 @@
-# netology_homework
+Homeworks for Netology "Python Developer" course.
