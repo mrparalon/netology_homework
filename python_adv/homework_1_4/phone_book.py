@@ -79,3 +79,4 @@ if __name__ == '__main__':
 
     print('\n_________проверка удаления_________\n'.upper())
     test_phone_book.get_all_contacts()
+
