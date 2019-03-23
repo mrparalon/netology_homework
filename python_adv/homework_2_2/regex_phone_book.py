@@ -21,6 +21,14 @@ class PhoneBook:
         for contact in contacts_list[1:]:
             self.phonebook_contacts.append(Contact(contact))
 
+    def find_similar_contacts(self):
+        similar_contacts = []
+        for i, contact in enumerate(self.phonebook_contacts):
+            for other_contact in self.phonebook_contacts[i+1:]:
+                if contact == other_contact:
+                    similar_contacts.append((contact, other_contact))
+        return similar_contacts
+
     
 
 
@@ -38,6 +46,21 @@ class Contact:
 
     def __str__(self):
         return f'{self.lastname} {self.firstname} {self.surname} {self.phone}'
+
+    def __eq__(self, other):
+        if self.lastname == other.lastname and self.firstname == other.firstname:
+            if self.surname or other.surname:
+                if self.surname == other.surname:
+                    return True
+                elif not (self.surname and other.surname):
+                    return True
+                else:
+                    return False
+            return True
+        else:
+            return False
+
+
 
     def normalize_name(self, contact_info):
         name_pattern = r'(\w+)\s+(\w+)(\s+)?(\w+)?'
@@ -77,4 +100,6 @@ class Contact:
 if __name__ == '__main__':
     test_phonebook = PhoneBook()
     test_phonebook.generate_contacts(contacts_list[1:])
-    print(test_phonebook.phonebook_contacts)
+    for contact_pair in test_phonebook.find_similar_contacts():
+        print(contact_pair[0], contact_pair[1])
+        
