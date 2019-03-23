@@ -22,12 +22,16 @@ class PhoneBook:
             self.phonebook_contacts.append(Contact(contact))
 
     def find_similar_contacts(self):
-        similar_contacts = []
+        similar_contacts_list = []
         for i, contact in enumerate(self.phonebook_contacts):
             for other_contact in self.phonebook_contacts[i+1:]:
                 if contact == other_contact:
-                    similar_contacts.append((contact, other_contact))
-        return similar_contacts
+                    similar_contacts_list.append((contact, other_contact))
+        return similar_contacts_list
+
+    def merge_similar_contacts(self, similar_contacts_list):
+        pass
+
 
     
 
@@ -48,17 +52,13 @@ class Contact:
         return f'{self.lastname} {self.firstname} {self.surname} {self.phone}'
 
     def __eq__(self, other):
+        result = False
         if self.lastname == other.lastname and self.firstname == other.firstname:
-            if self.surname or other.surname:
-                if self.surname == other.surname:
-                    return True
-                elif not (self.surname and other.surname):
-                    return True
-                else:
-                    return False
-            return True
-        else:
-            return False
+            result = True
+            if self.surname and other.surname:
+                if self.surname != other.surname:
+                    result = False 
+        return result
 
 
 
