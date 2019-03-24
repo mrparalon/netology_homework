@@ -14,23 +14,51 @@ class PhoneBook:
         self.csv_headers = ('lastname','firstname','surname','organization','position','phone','email')
         self.phonebook_contacts = []
 
-    # def __str__(self):
-    #     return '\n'.join(self.phonebook_contacts.__str__())
-
     def generate_contacts(self, contacts_list):
-        for contact in contacts_list[1:]:
+        for contact in contacts_list:
             self.phonebook_contacts.append(Contact(contact))
+
+    def find_and_merge_similar(self):
+        similar_contacts_list = self.find_similar_contacts()
+        merged_contact_list = []
+        new_phonebook_contacts = []
+        for contact_pair in similar_contacts_list:
+            merged_contact = self.merge_similar_contacts(contact_pair)
+            self.phonebook_contacts.remove(contact_pair[0])
+            self.phonebook_contacts.remove(contact_pair[1])
+            self.phonebook_contacts.append(merged_contact)
+
+
+
 
     def find_similar_contacts(self):
         similar_contacts_list = []
         for i, contact in enumerate(self.phonebook_contacts):
             for other_contact in self.phonebook_contacts[i+1:]:
-                if contact == other_contact:
+                if contact.is_similar(other_contact):
                     similar_contacts_list.append((contact, other_contact))
         return similar_contacts_list
 
-    def merge_similar_contacts(self, similar_contacts_list):
-        pass
+    def merge_similar_contacts(self, similar_contacts):
+        contact_1, contact_2 = similar_contacts[0], similar_contacts[1]
+        if not contact_1.surname and contact_2.surname:
+            contact_1.surname = contact_2.surname
+        if not contact_1.position and contact_2.position:
+            contact_1.position = contact_2.position
+        if not contact_1.phone and contact_2.phone:
+            contact_1.phone = contact_2.phone 
+        if not contact_1.email and contact_2.email:
+            contact_1.email = contact_2.email
+        return contact_1
+    
+    def get_list(self):
+        contacts_list = [list(self.csv_headers)]
+        for contact in self.phonebook_contacts:
+            contact_for_csv = [[contact.lastname, contact.firstname,
+            contact.surname, contact.organization, contact.position,
+            contact.phone, contact.email]]
+            contacts_list += contact_for_csv
+        return contacts_list
 
 
     
@@ -51,7 +79,7 @@ class Contact:
     def __str__(self):
         return f'{self.lastname} {self.firstname} {self.surname} {self.phone}'
 
-    def __eq__(self, other):
+    def is_similar(self, other):
         result = False
         if self.lastname == other.lastname and self.firstname == other.firstname:
             result = True
@@ -86,20 +114,26 @@ class Contact:
                 fixed_number += f' доб.{add_number[0]}'
             contact_info[5] = fixed_number
         return contact_info
-    
 
 
 
-# TODO 2: сохраните получившиеся данные в другой файл
-# код для записи файла в формате CSV
-# with open("phonebook.csv", "w", encoding='utf8') as f:
-#     datawriter = csv.writer(f, delimiter=',')
-#     # Вместо contacts_list подставьте свой список
-#     datawriter.writerows(fixed_contact_list)
+
+
 
 if __name__ == '__main__':
     test_phonebook = PhoneBook()
     test_phonebook.generate_contacts(contacts_list[1:])
-    for contact_pair in test_phonebook.find_similar_contacts():
-        print(contact_pair[0], contact_pair[1])
-        
+    for contact in test_phonebook.phonebook_contacts:
+        print(contact)
+    print('========')
+    test_phonebook.find_and_merge_similar()
+    for contact in test_phonebook.phonebook_contacts:
+        print(contact)
+    fixed_contact_list = test_phonebook.get_list()
+    print(fixed_contact_list)
+    # TODO 2: сохраните получившиеся данные в другой файл
+    # код для записи файла в формате CSV
+    with open("phonebook.csv", "w", encoding='utf8', newline='') as f:
+        datawriter = csv.writer(f, delimiter=',')
+        # Вместо contacts_list подставьте свой список
+        datawriter.writerows(fixed_contact_list)
