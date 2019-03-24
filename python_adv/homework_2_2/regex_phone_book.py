@@ -28,9 +28,6 @@ class PhoneBook:
             self.phonebook_contacts.remove(contact_pair[1])
             self.phonebook_contacts.append(merged_contact)
 
-
-
-
     def find_similar_contacts(self):
         similar_contacts_list = []
         for i, contact in enumerate(self.phonebook_contacts):
@@ -61,9 +58,6 @@ class PhoneBook:
         return contacts_list
 
 
-    
-
-
 class Contact:
     def __init__(self, contact_info):
         contact_info = self.normalize_name(contact_info)
@@ -87,8 +81,6 @@ class Contact:
                 if self.surname != other.surname:
                     result = False 
         return result
-
-
 
     def normalize_name(self, contact_info):
         name_pattern = r'(\w+)\s+(\w+)(\s+)?(\w+)?'
@@ -114,10 +106,6 @@ class Contact:
                 fixed_number += f' доб.{add_number[0]}'
             contact_info[5] = fixed_number
         return contact_info
-
-
-
-
 
 
 if __name__ == '__main__':
