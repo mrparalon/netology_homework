@@ -40,7 +40,15 @@ def create_course(course_name, course_table_name):
                         (course_table_name, course_name))
 
 
+def drop_all_tables(*args):
+    with psycopg2.connect(**db_config) as con:
+        with con.cursor() as cur:
+            for table_name in args:
+                cur.execute('drop table %s' % table_name)
+
+
 if __name__ == '__main__':
+    drop_all_tables('student', 'course', 'student_course')
     student_table_name = create_db('student', student_table)
     course_table_name = create_db('course', course_table)
     student_course_table_name = create_db('student_course',
