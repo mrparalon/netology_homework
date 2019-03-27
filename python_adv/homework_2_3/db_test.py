@@ -30,9 +30,25 @@ def create_db(name, table):
             req = 'create table %s (%s);' % (name, table)
             cur.execute(req)
             print(f'Table {name} created')
+            return name
+
+
+def create_course(course_name, course_table_name):
+    with psycopg2.connect(**db_config) as con:
+        with con.cursor() as cur:
+            cur.execute("insert into %s (name) values ('%s')" %
+                        (course_table_name, course_name))
 
 
 if __name__ == '__main__':
-    # create_db('student', student_table)
-    # create_db('course', course_table)
-    # create_db('student_course', student_course_table)
+    student_table_name = create_db('student', student_table)
+    course_table_name = create_db('course', course_table)
+    student_course_table_name = create_db('student_course',
+                                          student_course_table)
+    courses = ['Frontend-разработчик с нуля',
+               'Android-разработчик с нуля'
+               'Python-разработчик',
+               'Веб-разработчик нуля',
+               'Digital-start: первый шаг к востребованной профессии']
+    for course in courses:
+        create_course(course, course_table_name)
