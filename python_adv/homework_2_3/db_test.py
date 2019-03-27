@@ -1,10 +1,5 @@
 import psycopg2
 
-# with conn.cursor() as cur:
-#     cur.execute('select * from student limit 1')
-#     print(cur.fetchall())
-#     cur.execute('select * from student limit 1')
-#     print(cur.fetchall())
 
 db_config = {'dbname': 'netology_db',
              'user': 'netology_user_1',
@@ -12,34 +7,32 @@ db_config = {'dbname': 'netology_db',
              'host': '127.0.0.1'}
 
 
-def create_db(name):
+student_table = ', '.join(['id serial PRIMARY KEY',
+                           'name varchar(100) not null',
+                           'gpa numeric(10,2)',
+                           'birth timestamp with time zone'])
+
+course_table = 'id serial PRIMARY KEY,\
+                name varchar(100) not null'
+
+student_course_table = 'id serial PRIMARY KEY,\
+                        course_id int not null,\
+                        student_id int not null'
+
+# Я не придумал, как лучше передавать схему в функцию. Были варианты сделать
+# словарь или список списков с параметрами, но он бы потом собирался в строку.
+# Поэтому я решил все оставить простой строкой.
+
+
+def create_db(name, table):
     with psycopg2.connect(**db_config) as con:
         with con.cursor() as cur:
-            req = 'create table %s(\
-                         id serial PRIMARY KEY,\
-                         name varchar(100) not null,\
-                         gpa numeric(10,2),\
-                         birth timestamp with time zone)' % (name,)
+            req = 'create table %s (%s);' % (name, table)
             cur.execute(req)
+            print(f'Table {name} created')
 
 
-create_db("Student")
-
-# def add_course(name):
-#     with psycopg2.connect(db_config) as con:
-#         with con.cursor() as cur:
-#             cur.execute('insert into course (name) \
-#                         values (%s) returning id', (name, ))
-#             return cur.fetchall()
-
-
-# new_course_id = add_course('Программирование на Python')
-# print(new_course_id)
-
-# with psycopg2.connect(dbname='netology_db',
-#                       user='netology_user_1',
-#                       password='1234',
-#                       host='127.0.0.1') as con:
-#     with con.cursor() as cur:
-#         cur.execute('select * from course')
-#         print(cur.fetchall())
+if __name__ == '__main__':
+    # create_db('student', student_table)
+    # create_db('course', course_table)
+    # create_db('student_course', student_course_table)
