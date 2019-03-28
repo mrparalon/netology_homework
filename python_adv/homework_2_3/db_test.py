@@ -33,6 +33,13 @@ def create_db(name, table):
             return name
 
 
+def get_student(student_id):
+    with psycopg2.connect(**db_config) as con:
+        with con.cursor() as cur:
+            cur.execute('select %d from student' % student_id)
+            return cur.fetchone()
+
+
 def create_course(course_name, course_table_name):
     with psycopg2.connect(**db_config) as con:
         with con.cursor() as cur:
@@ -60,3 +67,4 @@ if __name__ == '__main__':
                'Digital-start: первый шаг к востребованной профессии']
     for course in courses:
         create_course(course, course_table_name)
+    
