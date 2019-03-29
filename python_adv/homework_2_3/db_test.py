@@ -19,18 +19,26 @@ student_course_table = 'id serial PRIMARY KEY,\
                         course_id int not null,\
                         student_id int not null'
 
-# Я не придумал, как лучше передавать схему в функцию. Были варианты сделать
-# словарь или список списков с параметрами, но он бы потом собирался в строку.
-# Поэтому я решил все оставить простой строкой.
 
-
-def create_db(name, table):
+def create_db():
     with psycopg2.connect(**db_config) as con:
         with con.cursor() as cur:
-            req = 'create table %s (%s);' % (name, table)
-            cur.execute(req)
-            print(f'Table {name} created')
-            return name
+            student_req = 'create table student \
+                                        (id serial PRIMARY KEY,\
+                                        name varchar(100) not null,\
+                                        gpa numeric(10,2),\
+                                        birth timestamp with time zone);'
+            course_req = 'create table course\
+                                        (id serial PRIMARY KEY,\
+                                        name varchar(100) not null);'
+            student_course_req = 'create table student_course\
+                                        (id serial PRIMARY KEY,\
+                                        student_id int not null,\
+                                        course_id int not null)'
+            cur.execute(student_req)
+            cur.execute(course_req)
+            cur.execute(student_course_req)
+            print(f'Tables student, course, student-course created')
 
 
 def get_student(student_id):
@@ -40,31 +48,54 @@ def get_student(student_id):
             return cur.fetchone()
 
 
-def create_course(course_name, course_table_name):
-    with psycopg2.connect(**db_config) as con:
-        with con.cursor() as cur:
-            cur.execute("insert into %s (name) values ('%s')" %
-                        (course_table_name, course_name))
+student = {
+    'name': 'Алексей Шерченков',
+    'gpa': '4.0',
+    'birth': '1991-12-08'
+}
 
 
-def drop_all_tables(*args):
+def add_student(student):
     with psycopg2.connect(**db_config) as con:
         with con.cursor() as cur:
-            for table_name in args:
-                cur.execute('drop table %s' % table_name)
+            req = "insert into student (name, gpa, birth) \
+                 values ('%(name)s', '%(gpa)s', '%(birth)s');" % student
+            cur.execute(req)
+
+
+def create_course(course_name):
+    with psycopg2.connect(**db_config) as con:
+        with con.cursor() as cur:
+            cur.execute("insert into course (name) values ('%s')" %
+                        (course_name, ))
+
+
+def drop_table(table_name):
+    with psycopg2.connect(**db_config) as con:
+        with con.cursor() as cur:
+            cur.execute('drop table %s' % table_name)
 
 
 if __name__ == '__main__':
-    drop_all_tables('student', 'course', 'student_course')
-    student_table_name = create_db('student', student_table)
-    course_table_name = create_db('course', course_table)
-    student_course_table_name = create_db('student_course',
-                                          student_course_table)
+    try:
+        drop_table('student')
+    except psycopg2.ProgrammingError:
+        pass
+    try:
+        drop_table('course')
+    except psycopg2.ProgrammingError:
+        pass
+    try:
+        drop_table('student_course')
+    except psycopg2.ProgrammingError:
+        pass
+    create_db()
     courses = ['Frontend-разработчик с нуля',
-               'Android-разработчик с нуля'
+               'Android-разработчик с нуля',
                'Python-разработчик',
                'Веб-разработчик нуля',
                'Digital-start: первый шаг к востребованной профессии']
     for course in courses:
-        create_course(course, course_table_name)
-    
+        create_course(course)
+    add_student(student)
+    print(get_student(1))
