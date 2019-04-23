@@ -1,21 +1,34 @@
 import vk_api
-from pymongo import MongoClient
+from db_handler import vk_user_db
 from datetime import datetime
 
 
-client = MongoClient()
-vk_user_db = client.vk_user_db
-
-
-def vk_authorize(app_id):
-    print('<3<3<3<3<3<3<3<3<3<3')
-    print('Перейдите по ссылке, чтобы получить доступ к своему будущему счастью')
-    print('<3<3<3<3<3<3<3<3<3<3'+'\n')
-    print('https://oauth.vk.com/authorize?client_id=6854512&scope=friends,groups&display=page&redirect_uri=https://oauth.vk.com/blank.html&response_type=token&v=5.95'+'\n')
-    TOKEN = input('Вставьте значение токена из адресной строки:\n')
-    vk_session = vk_api.VkApi(token=TOKEN, app_id=app_id)
+def create_vk_session(app_id, token):
+    vk_session = vk_api.VkApi(app_id=app_id, token=token)
     vk_api_instanse = vk_session.get_api()
     return vk_api_instanse
+
+
+def vk_authorize(app_id, token):
+    if token:
+        try:
+            vk = create_vk_session(app_id, token)
+            user = vk.users.get()[0]
+            print(f"С возвращением, {user['first_name']} {user['last_name']}")
+            return vk
+        except vk_api.VkApiError:
+            with open('vk_user_token.py', 'w') as token_file:
+                token_file.write('TOKEN = NONE')
+                vk_authorize(app_id, token)
+    else:
+        print('<3<3<3<3<3<3<3<3<3<3')
+        print('Перейдите по ссылке, чтобы получить доступ к своему будущему счастью')
+        print('<3<3<3<3<3<3<3<3<3<3'+'\n')
+        print('https://oauth.vk.com/authorize?client_id=6854512&scope=friends,groups&display=page&redirect_uri=https://oauth.vk.com/blank.html&response_type=token&v=5.95'+'\n')
+        token = input('Вставьте значение токена из адресной строки:\n')
+        with open('vk_user_token.py', 'w') as token_file:
+            token_file.write(f'TOKEN = "{token}"')
+        return create_vk_session(app_id, token)
 
 
 fields = ','.join(['bdate', 'city', 'country', 'interests',
@@ -24,13 +37,16 @@ fields = ','.join(['bdate', 'city', 'country', 'interests',
 
 
 class VkUser():
-    def __init__(self, user_id, fields, vk_api_instanse):
-        self.user_id = user_id
+    def __init__(self, fields, vk_api_instanse, user_id=None):
         self.fields = fields
         self.vk = vk_api_instanse
+        self.user_id = user_id
+        if not self.user_id:
+            self.user_id = int(self.vk.users.get()[0]['id'])
         self.entry_user = self.is_exists_in_db()
         if not self.entry_user:
-            self.user_data = self.get_user_data(user_id, fields)
+            self.user_data = self.get_user_data(self.user_id,
+                                                self.fields)
             self['photos'] = self.select_top_3_photo()
             self['bdate'] = self.bdate_to_datetime()
             self['age'] = self.get_age()
@@ -111,7 +127,7 @@ class VkUser():
 
 class VkUserToCompare(VkUser):
     def __init__(self, user_id, fields, vk_api_instanse, vk_user):
-        super().__init__(user_id, fields, vk_api_instanse)
+        super().__init__(fields, vk_api_instanse, user_id=user_id)
         self.main_user = vk_user
         self['score'] = self.get_score()
 
