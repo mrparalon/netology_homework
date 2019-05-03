@@ -116,15 +116,46 @@ class VkUserMain(VkUser):
     def get_missing_data(self):
         user_data = self.user_data
         if not user_data['age']:
-            age = int(input('Введите свой возраст: '))
-            user_data['age'] = age
+            user_data['age'] = self._get_age_from_user()
         if not user_data['city']:
-            city = input('Введите id вашего города: ')
+            city = self._get_city_from_user()
             user_data['city'] = {'id': city}
         if not user_data['books']:
             books = input('Введите любимые книги через запятую:\n')
             user_data['books'] = books
+        if not user_data['music']:
+            music = input('Введите любимых музыкальных исполнителей через запятую:\n')
+            user_data['music'] = music
+        if not user_data['tv']:
+            tv = input('Введите любимые сериалы и шоу через запятую: ')
+            user_data['tv'] = tv
+        if not user_data['movies']:
+            movies = input('Введите любимые фильмы через запятую: ')
+            user_data['movies'] = movies
+        if not user_data['games']:
+            games = input('Введите любимые игры через запятую: ')
+            user_data['games'] = games
         return user_data
+
+    def _get_input(text):
+        return input(text)
+
+    def _get_age_from_user(self):
+        while True:
+            try:
+                age = int(self._get_input('Введите свой возраст: '))
+                return age
+            except ValueError:
+                print('Возраст должен быть числом, попробуйте снова.')
+
+    def _get_city_from_user(self):
+        while True:
+            try:
+                city = self._get_input('Введите id вашего города: ')
+                int(city)
+                return city
+            except ValueError:
+                print('ID города должен быть числом, попробуйте снова.')
 
 
 class VkUserToCompare(VkUser):
@@ -206,12 +237,3 @@ class VkUserToCompare(VkUser):
             if score > 16:
                 score = 16
         return score
-
-
-# if __name__ == '__main__':
-    # fields = ','.join(['bdate', 'city', 'country', 'interests',
-    #                    'books', 'games', 'movies', 'music',
-    #                    'personal', 'relation', 'sex', 'tv'])
-    # # test_user = VkUser(28086193, fields)
-    # vk = vk_authorize(6854512)
-    # print(vk.users.get(user_ids=None))

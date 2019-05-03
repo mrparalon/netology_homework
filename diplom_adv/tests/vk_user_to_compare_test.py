@@ -1,4 +1,3 @@
-# import unittest
 from unittest import TestCase
 from vk_user import VkUserToCompare
 
