@@ -23,9 +23,16 @@ def write_users_to_db(users_data_list):
 
 
 def get_top_10_match():
-    all_users = vk_user_db.users.find({}, {'id': 1,
-                                           'first_name': 1,
-                                           'last_name': 1,
-                                           })
-    all_users.sort('score', DESCENDING)
-    return all_users
+    all_users = vk_user_db.users.find({'showed': {'$exists': False}},
+                                      {'id': 1, 'photos': 1})\
+                                       .sort('score', DESCENDING)\
+                                       .limit(10)
+    result = []
+    user_db_ids = []
+    for user in all_users:
+        user_db_id = user.pop('_id')
+        user_db_ids.append(user_db_id)
+        result.append(user)
+    vk_user_db.users.update_many({'_id': {'$in': user_db_ids}},
+                                 {'$set': {'showed': True}})
+    return result

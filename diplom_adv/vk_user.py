@@ -1,34 +1,5 @@
-import vk_api
 from db_handler import vk_user_db
 from datetime import datetime
-
-
-def create_vk_session(app_id, token):
-    vk_session = vk_api.VkApi(app_id=app_id, token=token)
-    vk_api_instanse = vk_session.get_api()
-    return vk_api_instanse
-
-
-def vk_authorize(app_id, token):
-    if token:
-        try:
-            vk = create_vk_session(app_id, token)
-            user = vk.users.get()[0]
-            print(f"С возвращением, {user['first_name']} {user['last_name']}")
-            return vk
-        except vk_api.VkApiError:
-            with open('vk_user_token.py', 'w') as token_file:
-                token_file.write('TOKEN = NONE')
-                vk_authorize(app_id, token)
-    else:
-        print('<3<3<3<3<3<3<3<3<3<3')
-        print('Перейдите по ссылке, чтобы получить доступ к своему будущему счастью')
-        print('<3<3<3<3<3<3<3<3<3<3'+'\n')
-        print('https://oauth.vk.com/authorize?client_id=6854512&scope=friends,groups&display=page&redirect_uri=https://oauth.vk.com/blank.html&response_type=token&v=5.95'+'\n')
-        token = input('Вставьте значение токена из адресной строки:\n')
-        with open('vk_user_token.py', 'w') as token_file:
-            token_file.write(f'TOKEN = "{token}"')
-        return create_vk_session(app_id, token)
 
 
 fields = ','.join(['bdate', 'city', 'country', 'interests',
@@ -87,9 +58,12 @@ class VkUser():
                 full_size_with_likes['id'] = photo['id']
                 full_size_with_likes['url'] = photo['sizes'][-1]['url']
                 photos.append(full_size_with_likes)
-                sorted_by_like = sorted(photos, reverse=True,
-                                        key=lambda x: x['likes']['count'],)
-            return sorted_by_like[:3]
+            sorted_by_like = sorted(photos, reverse=True,
+                                    key=lambda x: x['likes']['count'],)
+            top_3_photo = []
+            for photo in sorted_by_like[:3]:
+                top_3_photo.append(photo.pop('url'))
+            return top_3_photo
         return None
 
     def bdate_to_datetime(self):
@@ -125,6 +99,34 @@ class VkUser():
             return self.entry_user
 
 
+class VkUserMain(VkUser):
+    def __init__(self, fields, vk_api_instanse, user_id=None):
+        super().__init__(fields, vk_api_instanse, user_id=user_id)
+        self.user_data = self.get_missing_data()
+
+    def __getitem__(self, key):
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        return super().__setitem__(key, value)
+
+    def __str__(self):
+        return super().__str__()
+
+    def get_missing_data(self):
+        user_data = self.user_data
+        if not user_data['age']:
+            age = int(input('Введите свой возраст: '))
+            user_data['age'] = age
+        if not user_data['city']:
+            city = input('Введите id вашего города: ')
+            user_data['city'] = {'id': city}
+        if not user_data['books']:
+            books = input('Введите любимые книги через запятую:\n')
+            user_data['books'] = books
+        return user_data
+
+
 class VkUserToCompare(VkUser):
     def __init__(self, user_id, fields, vk_api_instanse, vk_user):
         super().__init__(fields, vk_api_instanse, user_id=user_id)
@@ -151,8 +153,10 @@ class VkUserToCompare(VkUser):
     def score_by_age(self):
         score = 0
         if self['age'] and self.main_user['age']:
-            age_difference = abs(self['age'] - self.main_user['age'])
-            if age_difference <= 5:
+            age_difference = abs(int(self['age']) - int(self.main_user['age']))
+            if self['age'] < 18:
+                score = -1000
+            elif age_difference <= 5:
                 score = 7
             elif 5 < age_difference <= 10:
                 score = 3
@@ -164,12 +168,14 @@ class VkUserToCompare(VkUser):
         other_user_groups = self['groups']
         if main_user_groups and other_user_groups:
             common_groups_counter = len(set(main_user_groups) &
-                                      set(other_user_groups))
+                                        set(other_user_groups))
             score = common_groups_counter * 400 /\
-                    (len(main_user_groups) + 
+                    (len(main_user_groups) +
                      len(other_user_groups))
+        if score > 15:
+            score = 15
         return score
-    
+
     def score_by_personal(self):
         score = 0
         if ('personal' in self.main_user.user_data) and\
@@ -196,19 +202,16 @@ class VkUserToCompare(VkUser):
         if self['friends'] and self.main_user['friends']:
             common_freinds_counter = len(set(self['friends']) &
                                          set(self.main_user['friends']))
-            score += common_freinds_counter
+            score += common_freinds_counter * 2
             if score > 16:
                 score = 16
         return score
 
 
-
-
-
-if __name__ == '__main__':
-    fields = ','.join(['bdate', 'city', 'country', 'interests',
-                       'books', 'games', 'movies', 'music',
-                       'personal', 'relation', 'sex', 'tv'])
-    # test_user = VkUser(28086193, fields)
-    vk = vk_authorize(6854512)
-    print(vk.users.get(user_ids=None))
+# if __name__ == '__main__':
+    # fields = ','.join(['bdate', 'city', 'country', 'interests',
+    #                    'books', 'games', 'movies', 'music',
+    #                    'personal', 'relation', 'sex', 'tv'])
+    # # test_user = VkUser(28086193, fields)
+    # vk = vk_authorize(6854512)
+    # print(vk.users.get(user_ids=None))

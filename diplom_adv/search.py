@@ -1,5 +1,5 @@
 from vk_user import VkUserToCompare, vk_user_db
-from db_handler import get_all_user_ids
+from db_handler import get_all_user_ids, vk_user_db
 from pprint import pprint
 
 
@@ -8,15 +8,27 @@ fields = ','.join(['bdate', 'city', 'country', 'interests',
                     'personal', 'relation', 'sex', 'tv'])
 
 
-def vk_search(vk_user, count, offset=0):
+def vk_search(vk_user, count):
     """
     Принимает объет VkUser того пользователя, 
     для которого нужно найти пару. Возращает список id найденных
     пользователей.
     """
+    offset = vk_user_db.offset.find_one()
+    if offset:
+        offset = offset['offset']
+    else:
+        offset = 0
     sex = 1 if vk_user['sex'] == 2 else 2
-    result = vk_user.vk.users.search(count=count, sex=sex, status=1)['items']
+    result = vk_user.vk.users.search(count=count, sex=sex,
+                                     status=1, offset=offset)['items']
     result = list(map(lambda x: int(x['id']), result))
+    offset += count
+    if offset > 1000:
+        offset = 1000
+    vk_user_db.offset.remove({})
+    vk_user_db.offset.insert_one({'offset': offset})
+    print(offset)
     return result
 
 
