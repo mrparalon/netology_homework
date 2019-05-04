@@ -103,6 +103,7 @@ class VkUserMain(VkUser):
     def __init__(self, fields, vk_api_instanse, user_id=None):
         super().__init__(fields, vk_api_instanse, user_id=user_id)
         self.user_data = self.get_missing_data()
+        self.write_to_db()
 
     def __getitem__(self, key):
         return super().__getitem__(key)
@@ -179,6 +180,7 @@ class VkUserToCompare(VkUser):
         score += self.score_by_groups()
         score += self.score_by_personal()
         score += self.score_by_city()
+        score += self.score_by_interstes()
         return score
 
     def score_by_age(self):
@@ -236,4 +238,20 @@ class VkUserToCompare(VkUser):
             score += common_freinds_counter * 2
             if score > 16:
                 score = 16
+        return score
+    
+    def score_by_interstes(self):
+        score = 0
+        interests = ["interests", "music", "movies", "tv", "books", "games"]
+        for interest in interests:
+            try:
+                if self.user_data[interest]:
+                    user_unterest = set(map(lambda x: x.lower(), 
+                                        self.user_data[interest].split(', ')))
+                    main_user_unterest = set(map(lambda x: x.lower(), 
+                                         self.main_user.user_data[interest].split(', ')))
+                    same_interests = user_unterest & main_user_unterest
+                    score += len(same_interests) / 5
+            except KeyError:
+                pass
         return score

@@ -1,20 +1,14 @@
-from vk_user import VkUserToCompare, vk_user_db
+from vk_user import VkUserToCompare
 from db_handler import get_all_user_ids, vk_user_db
-from pprint import pprint
 
 
-fields = ','.join(['bdate', 'city', 'country', 'interests',
-                    'books', 'games', 'movies', 'music',
-                    'personal', 'relation', 'sex', 'tv'])
-
-
-def vk_search(vk_user, count):
+def vk_search(vk_user, count, db_instance):
     """
     Принимает объет VkUser того пользователя, 
     для которого нужно найти пару. Возращает список id найденных
     пользователей.
     """
-    offset = vk_user_db.offset.find_one()
+    offset = db_instance.offset.find_one()
     if offset:
         offset = offset['offset']
     else:
@@ -28,12 +22,11 @@ def vk_search(vk_user, count):
         offset = 1000
     vk_user_db.offset.remove({})
     vk_user_db.offset.insert_one({'offset': offset})
-    print(offset)
     return result
 
 
 def delete_duplicate_users(user_ids_list):
-    db_user_ids = set(get_all_user_ids())
+    db_user_ids = set(get_all_user_ids(vk_user_db))
     user_ids = set(user_ids_list)
     return user_ids - db_user_ids
 
