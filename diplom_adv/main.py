@@ -7,8 +7,6 @@ import json
 
 
 if __name__ == '__main__':
-    vk_user_db.users.drop()
-    vk_user_db.offset.drop()
     token = vk_user_db.token.find_one()
     if token:
         token = token['token']
