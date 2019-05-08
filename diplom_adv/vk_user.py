@@ -102,7 +102,7 @@ class VkUser():
 class VkUserMain(VkUser):
     def __init__(self, fields, vk_api_instanse, user_id=None):
         super().__init__(fields, vk_api_instanse, user_id=user_id)
-        self.user_data = self.get_missing_data()
+        self.user_data = self._get_missing_data()
         self.write_to_db()
 
     def __getitem__(self, key):
@@ -114,31 +114,31 @@ class VkUserMain(VkUser):
     def __str__(self):
         return super().__str__()
 
-    def get_missing_data(self):
+    def _get_missing_data(self):
         user_data = self.user_data
-        if not user_data['age']:
+        if not user_data.get('age'):
             user_data['age'] = self._get_age_from_user()
-        if not user_data['city']:
+        if not user_data.get('city'):
             city = self._get_city_from_user()
             user_data['city'] = {'id': city}
-        if not user_data['books']:
+        if not user_data.get('books'):
             books = input('Введите любимые книги через запятую:\n')
             user_data['books'] = books
-        if not user_data['music']:
+        if not user_data.get('music'):
             music = input('Введите любимых музыкальных исполнителей через запятую:\n')
             user_data['music'] = music
-        if not user_data['tv']:
+        if not user_data.get('tv'):
             tv = input('Введите любимые сериалы и шоу через запятую: ')
             user_data['tv'] = tv
-        if not user_data['movies']:
+        if not user_data.get('movies'):
             movies = input('Введите любимые фильмы через запятую: ')
             user_data['movies'] = movies
-        if not user_data['games']:
+        if not user_data.get('games'):
             games = input('Введите любимые игры через запятую: ')
             user_data['games'] = games
         return user_data
 
-    def _get_input(text):
+    def _get_input(self, text):
         return input(text)
 
     def _get_age_from_user(self):
