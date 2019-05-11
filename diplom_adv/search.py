@@ -14,8 +14,10 @@ def vk_search(vk_user, count, db_instance):
     else:
         offset = 0
     sex = 1 if vk_user['sex'] == 2 else 2
+    city = vk_user['city']['id']
     result = vk_user.vk.users.search(count=count, sex=sex,
-                                     status=1, offset=offset)['items']
+                                     status=1, offset=offset,
+                                     city=city)['items']
     result = list(map(lambda x: int(x['id']), result))
     offset += count
     if offset > 1000:

@@ -121,6 +121,9 @@ class VkUserMain(VkUser):
         if not user_data.get('city'):
             city = self._get_city_from_user()
             user_data['city'] = {'id': city}
+        if not user_data.get('interests'):
+            interests = input('Введите ваши интересы через запятую:\n')
+            user_data['interests'] = interests
         if not user_data.get('books'):
             books = input('Введите любимые книги через запятую:\n')
             user_data['books'] = books
